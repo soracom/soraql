@@ -14,80 +14,6 @@ import (
 	"github.com/c-bata/go-prompt"
 )
 
-func TestGetEnvironmentConfig(t *testing.T) {
-	tests := []struct {
-		name            string
-		env             string
-		expectedProfile string
-		expectedBaseURL string
-		expectedAuthURL string
-	}{
-		{
-			name:            "jp-dev environment",
-			env:             "jp-dev",
-			expectedProfile: "sorao-dev",
-			expectedBaseURL: "jp-dev-active.api.soracom.io",
-			expectedAuthURL: "jp-dev-active.api.soracom.io",
-		},
-		{
-			name:            "g-dev environment",
-			env:             "g-dev",
-			expectedProfile: "sorao-dev",
-			expectedBaseURL: "jp-dev-active.api.soracom.io",
-			expectedAuthURL: "jp-dev-active.api.soracom.io",
-		},
-		{
-			name:            "jp-staging environment",
-			env:             "jp-staging",
-			expectedProfile: "sorako",
-			expectedBaseURL: "jp-prod-standby.api.soracom.io",
-			expectedAuthURL: "jp.api.soracom.io",
-		},
-		{
-			name:            "g-staging environment",
-			env:             "g-staging",
-			expectedProfile: "sorako",
-			expectedBaseURL: "g-prod-standby.api.soracom.io",
-			expectedAuthURL: "jp.api.soracom.io",
-		},
-		{
-			name:            "jp-prodaction environment",
-			env:             "jp-prodaction",
-			expectedProfile: "sorako",
-			expectedBaseURL: "jp.api.soracom.io",
-			expectedAuthURL: "jp.api.soracom.io",
-		},
-		{
-			name:            "g-prodaction environment",
-			env:             "g-prodaction",
-			expectedProfile: "sorako",
-			expectedBaseURL: "g.api.soracom.io",
-			expectedAuthURL: "g.api.soracom.io",
-		},
-		{
-			name:            "default environment",
-			env:             "",
-			expectedProfile: "sorako",
-			expectedBaseURL: "jp-dev-active.api.soracom.io",
-			expectedAuthURL: "jp-dev-active.api.soracom.io",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			profile, baseURL, authURL := getEnvironmentConfig(tt.env)
-			if profile != tt.expectedProfile {
-				t.Errorf("getEnvironmentConfig(%s) profile = %v, want %v", tt.env, profile, tt.expectedProfile)
-			}
-			if baseURL != tt.expectedBaseURL {
-				t.Errorf("getEnvironmentConfig(%s) baseURL = %v, want %v", tt.env, baseURL, tt.expectedBaseURL)
-			}
-			if authURL != tt.expectedAuthURL {
-				t.Errorf("getEnvironmentConfig(%s) authURL = %v, want %v", tt.env, authURL, tt.expectedAuthURL)
-			}
-		})
-	}
-}
 
 func TestReadFromStdin(t *testing.T) {
 	// Test with no stdin data
@@ -109,8 +35,8 @@ func TestClient_MakeRequest(t *testing.T) {
 		if r.Header.Get("x-soracom-token") != "test-token" {
 			t.Errorf("Missing or incorrect x-soracom-token header")
 		}
-		if r.Header.Get("x-soracom-dynamicroutes") != "test-dynamic-routes" {
-			t.Errorf("Missing or incorrect x-soracom-dynamicroutes header")
+		if r.Header.Get("x-test-header") != "test-value" {
+			t.Errorf("Missing or incorrect x-test-header")
 		}
 
 		// Return test response
@@ -123,7 +49,7 @@ func TestClient_MakeRequest(t *testing.T) {
 		httpClient:    &http.Client{},
 		apiKey:        "test-api-key",
 		token:         "test-token",
-		dynamicRoutes: "test-dynamic-routes",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         false,
 	}
 
@@ -180,7 +106,7 @@ func TestClient_MakeRequestWithPayload(t *testing.T) {
 		httpClient:    &http.Client{},
 		apiKey:        "test-api-key",
 		token:         "test-token",
-		dynamicRoutes: "test-dynamic-routes",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         false,
 	}
 
@@ -583,9 +509,13 @@ func TestExtractAllTableSchemas(t *testing.T) {
 }
 
 // Benchmark tests
-func BenchmarkGetEnvironmentConfig(b *testing.B) {
+func BenchmarkAuthResponseParsing(b *testing.B) {
+	jsonData := `{"apiKey": "test-key", "token": "test-token"}`
+	b.ResetTimer()
+	
 	for i := 0; i < b.N; i++ {
-		getEnvironmentConfig("jp-staging")
+		var authResp AuthResponse
+		json.Unmarshal([]byte(jsonData), &authResp)
 	}
 }
 
@@ -615,7 +545,7 @@ func TestErrorResponseHandling(t *testing.T) {
 		httpClient:    &http.Client{},
 		apiKey:        "test-api-key",
 		token:         "test-token",
-		dynamicRoutes: "test-dynamic-routes",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         false,
 	}
 
@@ -660,7 +590,7 @@ func TestHTTPErrorHandling(t *testing.T) {
 		httpClient:    &http.Client{},
 		apiKey:        "test-api-key",
 		token:         "test-token",
-		dynamicRoutes: "test-dynamic-routes",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         false,
 	}
 
@@ -725,7 +655,7 @@ func TestRunPipedMode(t *testing.T) {
 		authBaseURL:   strings.TrimPrefix(server.URL, "https://"),
 		apiKey:        "test-key",
 		token:         "test-token",
-		dynamicRoutes: "test-route",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         false,
 	}
 
@@ -888,7 +818,7 @@ func TestIntegrationHelper(t *testing.T) {
 		httpClient:    &http.Client{},
 		baseURL:       "test.api.soracom.io",
 		authBaseURL:   "test.api.soracom.io",
-		dynamicRoutes: "test-route",
+		customHeaders: map[string]string{"x-test-header": "test-value"},
 		debug:         true,
 	}
 	

@@ -41,9 +41,6 @@ func LoadTestConfig(filename string) (*TestRunner, error) {
 func (tr *TestRunner) RunTest(config TestConfig) error {
 	fmt.Printf("Running test: %s\n", config.SQL)
 	
-	// For unit tests, just verify the configuration is valid
-	_, _, _ = getEnvironmentConfig(config.Environment, "")
-
 	// Skip authentication for unit tests
 	if config.Environment == "test" {
 		return nil
