@@ -22,8 +22,8 @@ A command-line tool for executing SQL queries against Soracom's data warehouse A
 ### Build from source
 
 ```bash
-git clone https://github.com/soracom/SoraQL.git
-cd SoraQL
+git clone https://github.com/soracom/soraql.git
+cd soraql
 go build -o soraql main.go
 ```
 
