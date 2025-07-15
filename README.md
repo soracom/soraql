@@ -221,9 +221,9 @@ $ soraql -profile production
 production> .tables
 ┌────────────────────────────────────────────┐
 │ SIM_SESSION_EVENTS                         │
-│ SIM_SNAPSHOTS                             │
-│ CELL_TOWERS                               │
-│ HARVEST_DATA                              │
+│ SIM_SNAPSHOTS                              │
+│ CELL_TOWERS                                │
+│ HARVEST_DATA                               │
 └────────────────────────────────────────────┘
 (4 tables)
 
