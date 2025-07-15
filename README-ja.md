@@ -192,12 +192,15 @@ soraql -h
 ## 利用可能なテーブル
 
 クエリ可能な共通テーブル：
-- `SIM_SESSION_EVENTS`: SIMセッションと接続イベント
-- `SIM_SNAPSHOTS`: ポイントインタイムSIMステータス情報
+- `BILLING_HISTORY`: 請求履歴と使用量情報
 - `CELL_TOWERS`: セルタワーの位置とメタデータ
 - `COUNTRIES`: 国情報テーブル
-- `HARVEST_DATA`: 収集されたデータテーブル
-- `MCC_MNC`: モバイル国/ネットワークコードテーブル
+- `HARVEST_DATA`: Harvestデータテーブル
+- `HARVEST_FILES`: Harvestファイル情報
+- `NETWORKS`: 国コードとmcc/mncを含むMNO情報
+- `SIM_SESSION_EVENTS`: SIMセッションイベント
+- `SIM_SNAPSHOTS`: 最新キャプチャされたSIM情報
+- `SIM_STATS`: SIMトラフィック統計
 
 全ての利用可能なテーブルを確認するには、インタラクティブモードで `.tables` を使用するか、`-schema` オプションを使用してください。
 
@@ -220,12 +223,17 @@ soraql -sql "SELECT * FROM CELL_TOWERS WHERE COUNTRY = 'JP' LIMIT 5"
 $ soraql -profile production
 production> .tables
 ┌────────────────────────────────────────────┐
+│ BILLING_HISTORY                            │
+│ CELL_TOWERS                                │
+│ COUNTRIES                                  │
+│ HARVEST_DATA                               │
+│ HARVEST_FILES                              │
+│ NETWORKS                                   │
 │ SIM_SESSION_EVENTS                         │
 │ SIM_SNAPSHOTS                              │
-│ CELL_TOWERS                                │
-│ HARVEST_DATA                               │
+│ SIM_STATS                                  │
 └────────────────────────────────────────────┘
-(4 tables)
+(9 tables)
 
 production> SELECT COUNT(*) FROM SIM_SESSION_EVENTS;
 ┌───────────┐

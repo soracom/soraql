@@ -192,12 +192,15 @@ soraql -h
 ## Available Tables
 
 Common tables available for querying:
-- `SIM_SESSION_EVENTS`: SIM session and connectivity events
-- `SIM_SNAPSHOTS`: Point-in-time SIM status information
+- `BILLING_HISTORY`: Billing history and usage information
 - `CELL_TOWERS`: Cellular tower location and metadata
 - `COUNTRIES`: Country information table
-- `HARVEST_DATA`: Harvested data table
-- `MCC_MNC`: Mobile country/network codes table
+- `HARVEST_DATA`: Harvest data table
+- `HARVEST_FILES`: Harvest file information
+- `NETWORKS`: MNO information including country code and mcc/mnc
+- `SIM_SESSION_EVENTS`: SIM session events
+- `SIM_SNAPSHOTS`: Latest captured SIM information
+- `SIM_STATS`: SIM traffic statistics
 
 Use `.tables` in interactive mode or `-schema` option to see all available tables.
 
@@ -220,12 +223,17 @@ soraql -sql "SELECT * FROM CELL_TOWERS WHERE COUNTRY = 'JP' LIMIT 5"
 $ soraql -profile production
 production> .tables
 ┌────────────────────────────────────────────┐
+│ BILLING_HISTORY                            │
+│ CELL_TOWERS                                │
+│ COUNTRIES                                  │
+│ HARVEST_DATA                               │
+│ HARVEST_FILES                              │
+│ NETWORKS                                   │
 │ SIM_SESSION_EVENTS                         │
 │ SIM_SNAPSHOTS                              │
-│ CELL_TOWERS                                │
-│ HARVEST_DATA                               │
+│ SIM_STATS                                  │
 └────────────────────────────────────────────┘
-(4 tables)
+(9 tables)
 
 production> SELECT COUNT(*) FROM SIM_SESSION_EVENTS;
 ┌───────────┐
