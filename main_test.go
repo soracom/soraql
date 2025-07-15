@@ -280,7 +280,7 @@ func TestClient_DisplayJSONFile(t *testing.T) {
 	os.Stdout = w
 
 	client := &Client{debug: false}
-	err = client.displayJSONFile(tmpFile.Name())
+	err = client.displayJSONFile(tmpFile.Name(), []ColumnInfo{})
 
 	w.Close()
 	os.Stdout = oldStdout
