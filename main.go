@@ -38,9 +38,16 @@ type QueryResponse struct {
 	QueryId string `json:"queryId"`
 }
 
+type ColumnInfo struct {
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	DatabaseType string `json:"databaseType"`
+}
+
 type QueryStatusResponse struct {
-	Status string `json:"status"`
-	URL    string `json:"url"`
+	Status     string       `json:"status"`
+	URL        string       `json:"url"`
+	ColumnInfo []ColumnInfo `json:"columnInfo"`
 }
 
 type ErrorResponse struct {
@@ -2128,7 +2135,7 @@ func (c *Client) executeQuery(sqlQuery string, openFile bool) error {
 		}
 	}
 
-	return c.displayJSONFile(decompressedPath)
+	return c.displayJSONFile(decompressedPath, statusResp.ColumnInfo)
 }
 
 func (c *Client) callSQLAssistant(context, existingQuery string) (*SQLAssistantResponse, error) {
@@ -2306,7 +2313,7 @@ func (c *Client) showSQLAssistantAnimation(stop chan bool) {
 }
 
 
-func (c *Client) displayJSONFile(filepath string) error {
+func (c *Client) displayJSONFile(filepath string, columnInfo []ColumnInfo) error {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return err
@@ -2316,7 +2323,13 @@ func (c *Client) displayJSONFile(filepath string) error {
 	// Parse all rows to determine columns and data
 	var rows []map[string]interface{}
 	var columnOrder []string
-	columnSet := make(map[string]bool)
+
+	// Use column info from API response if available
+	if len(columnInfo) > 0 {
+		for _, col := range columnInfo {
+			columnOrder = append(columnOrder, col.Name)
+		}
+	}
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -2334,11 +2347,14 @@ func (c *Client) displayJSONFile(filepath string) error {
 
 		rows = append(rows, row)
 
-		// Track column names in order of first appearance
-		for key := range row {
-			if !columnSet[key] {
-				columnOrder = append(columnOrder, key)
-				columnSet[key] = true
+		// If no column info from API, fall back to tracking column names in order of first appearance
+		if len(columnOrder) == 0 {
+			columnSet := make(map[string]bool)
+			for key := range row {
+				if !columnSet[key] {
+					columnOrder = append(columnOrder, key)
+					columnSet[key] = true
+				}
 			}
 		}
 	}
