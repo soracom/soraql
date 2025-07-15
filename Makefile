@@ -84,9 +84,13 @@ github-release: release
 		--generate-notes
 
 # Generate Homebrew formula with current release
-homebrew-formula: release
+homebrew-formula:
 	@if [ -z "$$(git describe --tags --exact-match 2>/dev/null)" ]; then \
 		echo "Error: No git tag found. Create a tag first with: git tag v1.0.0"; \
+		exit 1; \
+	fi
+	@if [ ! -f "dist/soraql-darwin-amd64.tar.gz" ] || [ ! -f "dist/soraql-darwin-arm64.tar.gz" ] || [ ! -f "dist/soraql-linux-amd64.tar.gz" ] || [ ! -f "dist/soraql-linux-arm64.tar.gz" ]; then \
+		echo "Error: Release archives not found in dist/. Run 'make release' first."; \
 		exit 1; \
 	fi
 	@echo "Generating Homebrew formula for $$(git describe --tags)..."
