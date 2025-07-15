@@ -1,4 +1,4 @@
-.PHONY: build test test-verbose test-coverage bench clean release github-release
+.PHONY: build test test-verbose test-coverage bench clean release github-release homebrew-formula
 
 # Build the binary
 build:
@@ -83,6 +83,27 @@ github-release: release
 		--title "Release $$(git describe --tags)" \
 		--generate-notes
 
+# Generate Homebrew formula with current release
+homebrew-formula: release
+	@if [ -z "$$(git describe --tags --exact-match 2>/dev/null)" ]; then \
+		echo "Error: No git tag found. Create a tag first with: git tag v1.0.0"; \
+		exit 1; \
+	fi
+	@echo "Generating Homebrew formula for $$(git describe --tags)..."
+	@VERSION=$$(git describe --tags | sed 's/^v//'); \
+	DARWIN_AMD64_SHA=$$(shasum -a 256 dist/soraql-darwin-amd64.tar.gz | cut -d' ' -f1); \
+	DARWIN_ARM64_SHA=$$(shasum -a 256 dist/soraql-darwin-arm64.tar.gz | cut -d' ' -f1); \
+	LINUX_AMD64_SHA=$$(shasum -a 256 dist/soraql-linux-amd64.tar.gz | cut -d' ' -f1); \
+	LINUX_ARM64_SHA=$$(shasum -a 256 dist/soraql-linux-arm64.tar.gz | cut -d' ' -f1); \
+	sed -e "s/VERSION_PLACEHOLDER/$$VERSION/g" \
+	    -e "s/DARWIN_AMD64_SHA_PLACEHOLDER/$$DARWIN_AMD64_SHA/g" \
+	    -e "s/DARWIN_ARM64_SHA_PLACEHOLDER/$$DARWIN_ARM64_SHA/g" \
+	    -e "s/LINUX_AMD64_SHA_PLACEHOLDER/$$LINUX_AMD64_SHA/g" \
+	    -e "s/LINUX_ARM64_SHA_PLACEHOLDER/$$LINUX_ARM64_SHA/g" \
+	    homebrew-formula-template.rb > soraql.rb
+	@echo "Homebrew formula generated: soraql.rb"
+	@echo "Copy this file to your homebrew-soraql repository as Formula/soraql.rb"
+
 # Clean build artifacts
 clean:
 	rm -f soraql
@@ -103,6 +124,7 @@ help:
 	@echo "  test-short    - Run tests in short mode"
 	@echo "  release       - Build release archives for multiple platforms"
 	@echo "  github-release- Create GitHub release with archives (requires git tag)"
+	@echo "  homebrew-formula - Generate Homebrew formula for current release"
 	@echo "  clean         - Clean build artifacts"
 	@echo "  check         - Run build, test, and coverage"
 	@echo "  help          - Show this help message"
